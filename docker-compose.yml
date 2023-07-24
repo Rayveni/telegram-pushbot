@@ -1,0 +1,35 @@
+version: "3.91"
+services:
+  worker:
+    build:
+      context: ./backend/   
+      dockerfile: Dockerfile       
+    image: local_image/pushbot
+    environment: 
+      - redis_url=${redis_url} 
+      - TZ=${timezone}  
+      - tg_secret=${tg_secret}  
+      - chat_id=${chat_id}          
+    volumes: 
+      - type: bind
+        source: ${code_source}
+        target: /app     
+    command: >
+      sh -c "python example.py &&
+             python worker.py"          
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"   # количество файлов
+        max-size: "10m" # размер файла лога 
+        mode: "non-blocking"   
+  redis:
+    hostname: redis    
+    image: redis:7.0.8-bullseye  
+    ports:
+      - ${redis_port}    
+   
+
+ 
